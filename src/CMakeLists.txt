@@ -1,20 +1,19 @@
 
-set(TARGET foo)
+set(TARGET DispatchQueue)
 
-# Find with GLOB if CMake version is at least 3.12, otherwise use set
-file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${${PROJECT_NAME}_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp")
-#set(HEADER_LIST "${${PROJECT_NAME}_SOURCE_DIR}/include/${PROJECT_NAME}/foo.hpp")
+set(HEADER_LIST "${${PROJECT_NAME}_SOURCE_DIR}/include/dispatch.hpp")
 
-add_library(${TARGET} foo.cpp ${HEADER_LIST})
+set(SOURCE_LIST "${${PROJECT_NAME}_SOURCE_DIR}/src/dispatch.cpp")
+
+add_library(${TARGET} ${SOURCE_LIST} ${HEADER_LIST})
 
 target_include_directories(${TARGET} PUBLIC
-    #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 target_compile_features(${TARGET} PUBLIC cxx_std_17)
 
-target_link_libraries(${TARGET} PRIVATE fmt::fmt)
+target_link_libraries(${TARGET} PRIVATE Threads::Threads)
 
 # Check for Inter Procedural Optimization (IPO)
 include(CheckIPOSupported)

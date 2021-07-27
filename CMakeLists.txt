@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.15...3.20)
 
-project(FooBar
-    VERSION 0.1
-    DESCRIPTION "An awesome project"
+project(DispatchQueue
+    VERSION 0.1.0
+    DESCRIPTION "A threaded task dispatch queue"
     LANGUAGES CXX)
 
 # Set the default build type if non is specified
@@ -45,21 +45,10 @@ include(GNUInstallDirs)
 configure_File(cmake/config.h.in include/config.h)
 include_directories(PRIVATE ${CMAKE_BINARY_DIR}/include)
 
-# Use FetchContent instead of find_package for small stuff? Must be exported
-# with install targets to work.
-#include(FetchContent)
-
-# Formatting library
-#FetchContent_Declare(
-#    fmtlib
-#    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-#    GIT_TAG 5.3.0)
-#FetchContent_MakeAvailable(fmtlib)
-# Adds fmt::fmt
-
-find_package(fmt REQUIRED)
+find_package(Threads REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(example)
 
 # Create Targets file
 install(EXPORT ${PROJECT_NAME}Targets
