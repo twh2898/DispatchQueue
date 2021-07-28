@@ -13,4 +13,4 @@ cmake --build build
 
 # License
 
-This project uses the [MIT](License) License.
+This project uses the [MIT](LICENSE) License.
