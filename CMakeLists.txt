@@ -47,7 +47,7 @@ include_directories(PRIVATE ${CMAKE_BINARY_DIR}/include)
 
 find_package(Threads REQUIRED)
 
-add_subdirectory(src)
+add_subdirectory(include)
 add_subdirectory(example)
 
 # Create Targets file

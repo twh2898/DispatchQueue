@@ -3,17 +3,15 @@ set(TARGET DispatchQueue)
 
 set(HEADER_LIST "${${PROJECT_NAME}_SOURCE_DIR}/include/dispatch.hpp")
 
-set(SOURCE_LIST "${${PROJECT_NAME}_SOURCE_DIR}/src/dispatch.cpp")
+add_library(${TARGET} INTERFACE ${HEADER_LIST})
 
-add_library(${TARGET} ${SOURCE_LIST} ${HEADER_LIST})
-
-target_include_directories(${TARGET} PUBLIC
+target_include_directories(${TARGET} INTERFACE
     $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_compile_features(${TARGET} PUBLIC cxx_std_17)
-
-target_link_libraries(${TARGET} PRIVATE Threads::Threads)
+target_compile_features(${TARGET} INTERFACE cxx_std_17)
+target_precompile_headers(${TARGET} INTERFACE ${HEADER_LIST})
+target_link_libraries(${TARGET} INTERFACE Threads::Threads)
 
 # Check for Inter Procedural Optimization (IPO)
 include(CheckIPOSupported)
