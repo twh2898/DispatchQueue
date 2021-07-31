@@ -58,7 +58,7 @@ public:
      * Create a new `DispatchQueue` with queue `type`.
      * @param type the queue type
      */
-    DispatchQueue(QueueType type) {
+    DispatchQueue(QueueType type) : running(true) {
         workers.emplace_back(&DispatchQueue::worker, this, 0);
         if (type == Concurrent) {
             size_t n = std::thread::hardware_concurrency();
