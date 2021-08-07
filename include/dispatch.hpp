@@ -9,9 +9,61 @@
 #include <vector>
 
 /**
+ * Base for DispatchQueue where all tasks must be processed in a thread by calls
+ * to processOne or processAll. All calls are thread safe.
+ */
+class LocalDispatchQueue {
+protected:
+    std::queue<std::function<void()>> taskQueue;
+    mutable std::mutex m;
+
+public:
+    /**
+     * Add a task to the queue.
+     *
+     * @param task the lambda to execute for the task
+     */
+    void add(std::function<void()> task) {
+        std::unique_lock lk(m);
+        taskQueue.push(task);
+        lk.unlock();
+    }
+
+    /**
+     * Deque a single task and execute it. This method blocks until the task
+     * is complete.
+     */
+    void processOne() {
+        std::unique_lock lk(m);
+        if (!taskQueue.empty()) {
+            auto task = taskQueue.front();
+            taskQueue.pop();
+            lk.unlock();
+            task();
+            lk.lock();
+        }
+    }
+
+    /**
+     * Dequeue tasks one at a time and execute them sequentially. This method
+     * blocks until the task queue is empty.
+     */
+    void processAll() {
+        std::unique_lock lk(m);
+        while (!taskQueue.empty()) {
+            auto task = taskQueue.front();
+            taskQueue.pop();
+            lk.unlock();
+            task();
+            lk.lock();
+        }
+    }
+};
+
+/**
  * An Apple style Task Dispatch Queue.
  */
-class DispatchQueue {
+class DispatchQueue : protected LocalDispatchQueue {
 public:
     /**
      * Dispatch queue type. Serial executes tasks sequentially in a single
@@ -22,13 +74,9 @@ public:
     enum QueueType { Serial, Concurrent };
 
 private:
-    using Fn = std::function<void()>;
-
     std::vector<std::thread> workers;
-    mutable std::mutex m;
     std::condition_variable cv;
     std::atomic<bool> running;
-    std::queue<Fn> taskQueue;
 
     /**
      * Worker thread method. This method takes a task from the queue an executes
@@ -38,18 +86,16 @@ private:
      */
     void worker(size_t id) {
         while (running) {
-            std::unique_lock lk(m);
-            cv.wait(lk, [&]() {
-                return !running || !taskQueue.empty();
-            });
+            {
+                std::unique_lock lk(m);
+                cv.wait(lk, [&]() {
+                    return !running || !taskQueue.empty();
+                });
 
-            if (!running)
-                break;
-
-            auto task = taskQueue.front();
-            taskQueue.pop();
-            lk.unlock();
-            task();
+                if (!running)
+                    break;
+            }
+            processOne();
         }
     }
 
@@ -102,9 +148,7 @@ public:
      * @param task the lambda to execute for the task
      */
     void add(std::function<void()> task) {
-        std::unique_lock lk(m);
-        taskQueue.push(task);
-        lk.unlock();
+        LocalDispatchQueue::add(task);
         cv.notify_one();
     }
 };
