@@ -135,10 +135,17 @@ public:
     }
 
     /**
+     * Wait for all tasks to start execution.
+     */
+    void wait() {
+        while (working()) std::this_thread::yield();
+    }
+
+    /**
      * Wait for all tasks to start execution and then wait for their completion.
      */
     void join() {
-        while (working()) std::this_thread::yield();
+        wait();
         stop();
     }
 
