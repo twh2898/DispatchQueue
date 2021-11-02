@@ -1,9 +1,7 @@
 
 set(TARGET DispatchQueue)
 
-set(HEADER_LIST "${${PROJECT_NAME}_SOURCE_DIR}/include/dispatch.hpp")
-
-add_library(${TARGET} dispatch.cpp ${HEADER_LIST})
+add_library(${TARGET} DispatchQueue.cpp ../include/DispatchQueue.hpp)
 
 target_include_directories(${TARGET} PUBLIC
     $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
