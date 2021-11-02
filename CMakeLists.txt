@@ -25,10 +25,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Support folders in IDEs
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-    # Testing only available for top level projects. It calls enable_testing
-    # which must be in the main CMakeLists.
-    include(CTest)
-
     # Generate documentation using Doxygen
     find_package(Doxygen)
     if(Doxygen_FOUND)
@@ -41,13 +37,9 @@ endif()
 # Use for platform independent install dirs, despite being called GNU
 include(GNUInstallDirs)
 
-# Create config.h with project version numbers
-configure_File(cmake/config.h.in include/config.h)
-include_directories(PRIVATE ${CMAKE_BINARY_DIR}/include)
-
 find_package(Threads REQUIRED)
 
-add_subdirectory(include)
+add_subdirectory(src)
 add_subdirectory(example)
 
 # Create Targets file
@@ -64,15 +56,10 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion)
 
 # Copy the Config file to the build dir
-configure_file(cmake/ProjectConfig.cmake ${PROJECT_NAME}Config.cmake COPYONLY)
+configure_file(cmake/ProjectConfig.cmake ${PROJECT_NAME}Config.cmake @ONLY)
 
 # Add Config and ConfigVersion files to install
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-
-# Add tests
-#if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING) AND BUILD_TESTING)
-#    add_subdirectory(tests)
-#endif()
